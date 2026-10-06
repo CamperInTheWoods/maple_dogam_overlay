@@ -37,6 +37,15 @@ function ensureSkeleton() {
   $("ov-wrap").innerHTML = SKELETON;
   $("ov-toggle").addEventListener("click", () => window.overlay.sendCommand({ type: "toggle" }));
   $("ov-ch").addEventListener("click", () => window.overlay.sendCommand({ type: "channel" }));
+  // 기준 아이템/몬스터카드 좌클릭 +1 (웹 오버레이와 동일 동작, 실제 증가는 웹이 처리)
+  $("ov-item").addEventListener("click", (e) => {
+    const card = e.target.closest(".ov-item-card");
+    if (card) window.overlay.sendCommand({ type: "inc", mobId: Number(card.dataset.mobId), dropId: Number(card.dataset.baseId) });
+  });
+  $("ov-mcard").addEventListener("click", (e) => {
+    const card = e.target.closest(".ov-mcard-card");
+    if (card) window.overlay.sendCommand({ type: "inc", mobId: Number(card.dataset.mobId), dropId: Number(card.dataset.dropId) });
+  });
   built = true;
 }
 
@@ -92,7 +101,7 @@ function renderCards(snap) {
     if (itemEl.dataset.k !== key) {
       itemEl.dataset.k = key;
       itemEl.innerHTML = cards.map((c) =>
-        `<div class="ov-item-card" title="${c.name}${c.isAuto ? " (자동·가장 흔한)" : " (기준)"}"><img src="${itemImg(c.dropId)}" onerror="this.style.visibility='hidden'"><div class="ov-item-cnt">${c.cnt}</div></div>`
+        `<div class="ov-item-card" data-mob-id="${c.mobId}" data-base-id="${c.dropId}" title="${c.name}${c.isAuto ? " (자동·가장 흔한)" : " (기준)"} — 좌클릭 +1"><img src="${itemImg(c.dropId)}" onerror="this.style.visibility='hidden'"><div class="ov-item-cnt">${c.cnt}</div></div>`
       ).join("");
     }
   }
@@ -106,7 +115,7 @@ function renderCards(snap) {
     if (mcardEl.dataset.k !== key) {
       mcardEl.dataset.k = key;
       mcardEl.innerHTML = mcards.map((c) =>
-        `<div class="ov-mcard-card" title="몬스터카드"><img src="${snap.mcardImg || ""}"><div class="ov-mcard-cnt">${c.cnt}</div></div>`
+        `<div class="ov-mcard-card" data-mob-id="${c.mobId}" data-drop-id="${c.dropId}" title="몬스터카드 — 좌클릭 +1"><img src="${snap.mcardImg || ""}"><div class="ov-mcard-cnt">${c.cnt}</div></div>`
       ).join("");
     }
   }
