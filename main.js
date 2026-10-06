@@ -88,3 +88,6 @@ app.on("window-all-closed", () => app.quit());
 
 ipcMain.on("close-overlay", () => app.quit());
 ipcMain.on("command", (_e, cmd) => { if (cmd && typeof cmd.type === "string") pendingCommands.push(cmd); });
+ipcMain.on("resize", (_e, w, h) => {
+  if (win && !win.isDestroyed() && w > 0 && h > 0) win.setSize(Math.round(w), Math.round(h));
+});

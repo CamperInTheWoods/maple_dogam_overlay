@@ -125,6 +125,25 @@ function renderCards(snap) {
   setShown($("ov-cards-row"), cards.length > 0 || mcards.length > 0);
 }
 
+// 타임라인은 웹이 같은 폭 기준으로 만든 HTML을 그대로 받아서 표시
+function renderTimeline(snap) {
+  const s = snap.settings || {};
+  const el = $("ov-timeline");
+  const show = !!s.ov_tl_layout && (snap.mobs || []).length > 0 && !!snap.timelineHtml;
+  setShown(el, show);
+  if (show) el.innerHTML = snap.timelineHtml;
+}
+
+// 창 크기를 웹 PiP와 같은 너비, 내용에 맞는 높이로 맞춤
+let lastSize = "";
+function fitWindow(snap) {
+  const small = !!(snap.settings || {}).ov_small;
+  const wrap = $("ov-wrap");
+  const h = Math.ceil((small ? 6 : 10) + wrap.getBoundingClientRect().height + (small ? 4 : 6));
+  const key = `${snap.winW}x${h}`;
+  if (key !== lastSize && snap.winW) { lastSize = key; window.overlay.resize(snap.winW, h); }
+}
+
 function render(snap) {
   ensureSkeleton();
   const s = snap.settings || {};
@@ -133,6 +152,7 @@ function render(snap) {
   if (styleEl.dataset.src !== snap.style) { styleEl.dataset.src = snap.style || ""; styleEl.textContent = snap.style || ""; }
   $("ov-wrap").style.background = `${theme.bg}d9`;
   document.body.classList.toggle("small", !!s.ov_small);
+  document.body.classList.toggle("tl-layout", !!s.ov_tl_layout);
 
   const running = !!snap.running;
   const mobs = snap.mobs || [];
@@ -157,6 +177,8 @@ function render(snap) {
   tg.className = "ov-toggle" + (running ? " run" : "");
 
   renderCards(snap);
+  renderTimeline(snap);
+  fitWindow(snap);
 }
 
 window.overlay.onSnapshot(render);
