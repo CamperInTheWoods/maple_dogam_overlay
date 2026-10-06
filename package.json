@@ -1,0 +1,21 @@
+{
+  "name": "maple-dogam-overlay",
+  "productName": "도감 오버레이",
+  "version": "0.1.0",
+  "description": "도감작 도우미 웹과 연동되는 투명 항상위 오버레이",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.camperinthewoods.maple-dogam-overlay",
+    "productName": "도감 오버레이",
+    "win": { "target": "nsis" },
+    "files": ["main.js", "preload.js", "renderer/**"]
+  }
+}

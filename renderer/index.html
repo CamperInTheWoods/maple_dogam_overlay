@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>도감 오버레이</title>
+  <style>
+    html, body { margin: 0; background: transparent; font-family: "Malgun Gothic", sans-serif; color: #fff; user-select: none; }
+    .wrap { -webkit-app-region: drag; height: 100vh; box-sizing: border-box; padding: 10px 14px; background: rgba(20, 22, 28, .55); border-radius: 10px; display: flex; flex-direction: column; justify-content: center; }
+    .row { display: flex; align-items: baseline; gap: 10px; }
+    .name { font-size: 14px; opacity: .85; }
+    .time { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .sub { font-size: 12px; opacity: .7; }
+    .link { font-size: 11px; opacity: .6; margin-top: 4px; }
+    .link.off { color: #e06060; opacity: 1; }
+    .close { position: absolute; top: 4px; right: 8px; -webkit-app-region: no-drag; background: none; border: none; color: #fff; opacity: 0; cursor: pointer; font-size: 14px; }
+    .wrap:hover .close { opacity: .7; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <button class="close" onclick="window.overlay.close()" title="닫기">×</button>
+    <div class="row"><span class="name" id="name">도감작 없음</span></div>
+    <div class="time" id="time">00:00:00</div>
+    <div class="sub" id="sub"></div>
+    <div class="link" id="link">웹 연결 대기 중…</div>
+  </div>
+  <script src="renderer.js"></script>
+</body>
+</html>
