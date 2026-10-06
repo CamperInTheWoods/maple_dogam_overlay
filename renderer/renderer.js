@@ -7,8 +7,8 @@ const SKELETON = `
     <div class="ov-ch-time" id="ov-ch-time" style="display:none"></div>
     <div class="ov-last-item-time" id="ov-last-item-time" style="display:none"></div>
     <div class="ov-btns">
-      <button class="ov-toggle" id="ov-toggle" disabled>▶ 시작</button>
-      <button class="ov-ch" id="ov-ch" disabled>채널변경</button>
+      <button class="ov-toggle" id="ov-toggle">▶ 시작</button>
+      <button class="ov-ch" id="ov-ch">채널변경</button>
     </div>
     <div id="ov-cards-row">
       <div class="ov-item" id="ov-item" style="display:none"></div>
@@ -35,8 +35,26 @@ let built = false;
 function ensureSkeleton() {
   if (built) return;
   $("ov-wrap").innerHTML = SKELETON;
+  $("ov-toggle").addEventListener("click", () => window.overlay.sendCommand({ type: "toggle" }));
+  $("ov-ch").addEventListener("click", () => window.overlay.sendCommand({ type: "channel" }));
   built = true;
 }
+
+// 스냅샷은 0.5초마다 오므로, 사이사이는 마지막 값에 경과 시간을 더해 부드럽게 흘려보냄
+let anchor = null; // { elapsed, ch, last, running, at }
+function liveMs(base) {
+  if (base == null) return null;
+  return base + (anchor.running ? performance.now() - anchor.at : 0);
+}
+function paintTimes() {
+  if (anchor) {
+    $("ov-time").textContent = fmtTime(liveMs(anchor.elapsed) || 0);
+    if (anchor.ch != null) $("ov-ch-time").textContent = fmtTime(liveMs(anchor.ch));
+    if (anchor.last != null) $("ov-last-item-time").textContent = fmtTime(liveMs(anchor.last));
+  }
+  requestAnimationFrame(paintTimes);
+}
+requestAnimationFrame(paintTimes);
 
 function setShown(el, shown) {
   if (el) el.style.display = shown ? "" : "none";
@@ -116,17 +134,14 @@ function render(snap) {
   setShown(nameEl, !!s.ov_show_name);
   nameEl.textContent = mobs.length ? mobs.map((m) => m.name).join(" / ") : "도감작 없음";
 
-  const timeEl = $("ov-time");
-  timeEl.textContent = fmtTime(snap.elapsedMs || 0);
-  timeEl.style.opacity = running ? "1" : ".38";
+  anchor = { elapsed: snap.elapsedMs || 0, ch: snap.chTimeMs, last: snap.lastItemMs, running, at: performance.now() };
+  $("ov-time").style.opacity = running ? "1" : ".38";
+  paintTimes();
 
   const chEl = $("ov-ch-time");
-  if (!s.ov_show_chtime || snap.chTimeMs == null) setShown(chEl, false);
-  else { chEl.textContent = fmtTime(snap.chTimeMs); setShown(chEl, true); }
-
+  setShown(chEl, !!s.ov_show_chtime && snap.chTimeMs != null);
   const lastEl = $("ov-last-item-time");
-  if (!s.ov_show_last_item_time || snap.lastItemMs == null) setShown(lastEl, false);
-  else { lastEl.textContent = fmtTime(snap.lastItemMs); setShown(lastEl, true); }
+  setShown(lastEl, !!s.ov_show_last_item_time && snap.lastItemMs != null);
 
   const tg = $("ov-toggle");
   tg.textContent = running ? "⏸ 정지" : "▶ 시작";

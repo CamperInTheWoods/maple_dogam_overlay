@@ -10,6 +10,7 @@ const STALE_MS = 5000;
 
 let win = null;
 let lastSnapshotAt = 0;
+const pendingCommands = [];
 
 function allowOrigin(req, res) {
   const origin = req.headers.origin || "";
@@ -39,7 +40,9 @@ function startServer() {
           const snap = JSON.parse(body);
           lastSnapshotAt = Date.now();
           if (win && !win.isDestroyed()) win.webContents.send("snapshot", snap);
-          res.writeHead(204); res.end();
+          // 설치형 창에서 누른 명령(시작/정지, 채널변경)은 다음 응답에 실어 웹이 실행하게 함
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ commands: pendingCommands.splice(0) }));
         } catch {
           res.writeHead(400); res.end();
         }
@@ -84,3 +87,4 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => app.quit());
 
 ipcMain.on("close-overlay", () => app.quit());
+ipcMain.on("command", (_e, cmd) => { if (cmd && typeof cmd.type === "string") pendingCommands.push(cmd); });
