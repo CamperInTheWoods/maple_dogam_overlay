@@ -10,6 +10,7 @@ const STALE_MS = 5000;
 
 let win = null;
 let lastSnapshotAt = 0;
+let lastWidth = 0;
 const pendingCommands = [];
 
 function allowOrigin(req, res) {
@@ -41,8 +42,9 @@ function startServer() {
           lastSnapshotAt = Date.now();
           if (win && !win.isDestroyed()) win.webContents.send("snapshot", snap);
           // 설치형 창에서 누른 명령(시작/정지, 채널변경)은 다음 응답에 실어 웹이 실행하게 함
+          // 창 너비도 같이 돌려줘서, 사용자가 늘린 만큼 웹이 타임라인 시간 범위를 맞추게 함
           res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ commands: pendingCommands.splice(0) }));
+          res.end(JSON.stringify({ commands: pendingCommands.splice(0), width: lastWidth }));
         } catch {
           res.writeHead(400); res.end();
         }
@@ -69,6 +71,7 @@ function createWindow() {
     webPreferences: { preload: require("path").join(__dirname, "preload.js") },
   });
   win.setAlwaysOnTop(true, "screen-saver");
+  win.on("resize", () => { lastWidth = win.getBounds().width; });
   win.loadFile(require("path").join(__dirname, "renderer", "index.html"));
   win.on("closed", () => { win = null; });
 }

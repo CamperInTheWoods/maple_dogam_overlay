@@ -135,13 +135,16 @@ function renderTimeline(snap) {
 }
 
 // 창 크기를 웹 PiP와 같은 너비, 내용에 맞는 높이로 맞춤
-let lastSize = "";
+// 설정(스몰/타임라인 등)이 바뀌면 기본 너비로 되돌리고, 그 밖에는 사용자가 늘린 너비를 유지
+let lastSize = "", lastWinW = null;
 function fitWindow(snap) {
   const small = !!(snap.settings || {}).ov_small;
   const wrap = $("ov-wrap");
   const h = Math.ceil((small ? 6 : 10) + wrap.getBoundingClientRect().height + (small ? 4 : 6));
-  const key = `${snap.winW}x${h}`;
-  if (key !== lastSize && snap.winW) { lastSize = key; window.overlay.resize(snap.winW, h); }
+  const w = snap.winW !== lastWinW ? snap.winW : window.innerWidth;
+  lastWinW = snap.winW;
+  const key = `${w}x${h}`;
+  if (key !== lastSize && w) { lastSize = key; window.overlay.resize(w, h); }
 }
 
 function render(snap) {
