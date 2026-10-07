@@ -16,6 +16,11 @@
     "appId": "com.camperinthewoods.maple-dogam-overlay",
     "productName": "도감 오버레이",
     "win": { "target": "nsis", "icon": "build/icon.png" },
-    "files": ["main.js", "preload.js", "renderer/**"]
+    "files": ["main.js", "preload.js", "renderer/**"],
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeCliInspectArguments": false,
+      "onlyLoadAppFromAsar": true
+    }
   }
 }

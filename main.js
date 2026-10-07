@@ -2,10 +2,11 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const http = require("http");
 
 const PORT = 47823;
-const ALLOWED_ORIGINS = [
+// 정확히 일치하는 출처만 허용 (접두사 비교는 localhost.evil.com 같은 주소를 통과시키므로 쓰지 않음)
+const ALLOWED_ORIGINS = new Set([
   "https://camperinthewoods.github.io",
-  "https://ddollero.goatcounter.com",
-];
+  "http://localhost:8080", // 로컬 테스트용 (npx serve)
+]);
 const STALE_MS = 5000;
 
 let win = null;
@@ -15,7 +16,7 @@ const pendingCommands = [];
 
 function allowOrigin(req, res) {
   const origin = req.headers.origin || "";
-  const ok = ALLOWED_ORIGINS.includes(origin) || origin.startsWith("http://localhost") || origin.startsWith("http://127.0.0.1");
+  const ok = ALLOWED_ORIGINS.has(origin);
   if (ok) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Private-Network", "true");
@@ -69,8 +70,16 @@ function createWindow() {
     icon: require("path").join(__dirname, "build", "icon.png"),
     hasShadow: false,
     resizable: true,
-    webPreferences: { preload: require("path").join(__dirname, "preload.js") },
+    webPreferences: {
+      preload: require("path").join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+    },
   });
+  // 창이 외부 주소로 이동하거나 새 창을 여는 것을 막음
+  win.webContents.on("will-navigate", (e) => e.preventDefault());
+  win.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   win.setAlwaysOnTop(true, "screen-saver");
   win.on("resize", () => { lastWidth = win.getBounds().width; });
   win.loadFile(require("path").join(__dirname, "renderer", "index.html"));

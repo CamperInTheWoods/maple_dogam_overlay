@@ -20,6 +20,44 @@ const $ = (id) => document.getElementById(id);
 const itemImg = (id) => `https://maplestory.io/api/kms/284/item/${id}/icon`;
 const mobImg = (id) => `https://maplestory.io/api/kms/284/mob/${id}/icon`;
 
+// 이미지 주소는 메이플 서버와 앱 내부 데이터만 허용
+const IMG_PREFIXES = ["https://maplestory.io/", "data:image/"];
+const safeImg = (src) => (typeof src === "string" && IMG_PREFIXES.some((p) => src.startsWith(p)) ? src : "");
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+// 웹에서 받은 타임라인 HTML은 허용된 태그/속성만 남기고 나머지는 전부 제거 (스크립트, on* 속성 차단)
+const ALLOWED_TAGS = new Set(["DIV", "SPAN", "IMG"]);
+function sanitize(html) {
+  const tpl = document.createElement("template");
+  tpl.innerHTML = html || "";
+  tpl.content.querySelectorAll("*").forEach((el) => {
+    if (!ALLOWED_TAGS.has(el.tagName)) { el.remove(); return; }
+    [...el.attributes].forEach((a) => {
+      const n = a.name.toLowerCase();
+      if (n.startsWith("on") || (n !== "class" && n !== "style" && n !== "title" && n !== "src" && !n.startsWith("data-"))) {
+        el.removeAttribute(a.name);
+      }
+    });
+    if (el.tagName === "IMG") {
+      const src = safeImg(el.getAttribute("src"));
+      if (src) el.setAttribute("src", src); else el.remove();
+    }
+  });
+  return tpl.innerHTML;
+}
+
+// 이미지 로드 실패 처리 — 인라인 onerror 대신 이벤트 리스너로 처리 (CSP가 인라인 핸들러를 막기 때문)
+document.addEventListener("error", (e) => {
+  const img = e.target;
+  if (img.tagName !== "IMG") return;
+  if (img.dataset.fallback && !img.dataset.fellBack) {
+    img.dataset.fellBack = "1";
+    img.src = img.dataset.fallback;
+  } else {
+    img.style.visibility = "hidden";
+  }
+}, true);
+
 // 웹 fmtTime과 같은 형식: HH:MM:SS.cc
 function fmtTime(ms) {
   ms = Math.max(0, ms);
@@ -94,12 +132,12 @@ function renderMobs(snap, running) {
   if (el.dataset.k !== key) {
     el.dataset.k = key;
     el.innerHTML = mobs.map((m) => {
-      if (m.img) return `<span class="ov-mob"><img src="${m.img}"></span>`;
-      const base = `https://maplestory.io/api/kms/284/mob/${m.id}/render`;
-      const stat = mobImg(m.id);
+      if (m.img) return `<span class="ov-mob"><img src="${esc(safeImg(m.img))}"></span>`;
+      const base = `https://maplestory.io/api/kms/284/mob/${Number(m.id)}/render`;
+      const stat = mobImg(Number(m.id));
       return `<span class="ov-mob">` +
-        `<img data-anim="move" src="${base}/move" onerror="this.onerror=null;this.src='${stat}'">` +
-        `<img data-anim="stand" src="${base}/stand" onerror="this.onerror=null;this.src='${stat}'">` +
+        `<img data-anim="move" src="${base}/move" data-fallback="${stat}">` +
+        `<img data-anim="stand" src="${base}/stand" data-fallback="${stat}">` +
         `</span>`;
     }).join("");
   }
@@ -119,7 +157,7 @@ function renderCards(snap) {
     if (itemEl.dataset.k !== key) {
       itemEl.dataset.k = key;
       itemEl.innerHTML = cards.map((c) =>
-        `<div class="ov-item-card" data-mob-id="${c.mobId}" data-base-id="${c.dropId}" title="${c.name}${c.isAuto ? " (자동·가장 흔한)" : " (기준)"} — 좌클릭 +1"><img src="${itemImg(c.dropId)}" onerror="this.style.visibility='hidden'"><div class="ov-item-cnt">${c.cnt}</div></div>`
+        `<div class="ov-item-card" data-mob-id="${Number(c.mobId)}" data-base-id="${Number(c.dropId)}" title="${esc(c.name)}${c.isAuto ? " (자동·가장 흔한)" : " (기준)"} — 좌클릭 +1"><img src="${itemImg(Number(c.dropId))}"><div class="ov-item-cnt">${Number(c.cnt)}</div></div>`
       ).join("");
     }
   }
@@ -133,7 +171,7 @@ function renderCards(snap) {
     if (mcardEl.dataset.k !== key) {
       mcardEl.dataset.k = key;
       mcardEl.innerHTML = mcards.map((c) =>
-        `<div class="ov-mcard-card" data-mob-id="${c.mobId}" data-drop-id="${c.dropId}" title="몬스터카드 — 좌클릭 +1"><img src="${snap.mcardImg || ""}"><div class="ov-mcard-cnt">${c.cnt}</div></div>`
+        `<div class="ov-mcard-card" data-mob-id="${Number(c.mobId)}" data-drop-id="${Number(c.dropId)}" title="몬스터카드 — 좌클릭 +1"><img src="${esc(safeImg(snap.mcardImg))}"><div class="ov-mcard-cnt">${Number(c.cnt)}</div></div>`
       ).join("");
     }
   }
@@ -149,7 +187,7 @@ function renderTimeline(snap) {
   const el = $("ov-timeline");
   const show = !!s.ov_tl_layout && (snap.mobs || []).length > 0 && !!snap.timelineHtml;
   setShown(el, show);
-  if (show) el.innerHTML = snap.timelineHtml;
+  if (show) el.innerHTML = sanitize(snap.timelineHtml);
 }
 
 // 창 크기를 웹 PiP와 같은 너비, 내용에 맞는 높이로 맞춤
