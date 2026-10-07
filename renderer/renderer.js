@@ -262,6 +262,6 @@ window.overlay.onSnapshot(render);
 
 window.overlay.onLinkState((st) => {
   const el = $("link");
-  el.textContent = st.connected ? "웹 연결됨" : "연결 끊김 (웹 탭을 열어주세요)";
+  el.textContent = st.connected ? "" : "연결 끊김 (웹 탭을 열어주세요)";
   el.className = st.connected ? "" : "off";
 });
