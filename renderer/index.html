@@ -9,6 +9,9 @@
     #ov-wrap button, #ov-wrap .ov-item-card, #ov-wrap .ov-mcard-card { -webkit-app-region: no-drag; }
     #grip { position: fixed; top: 0; right: 0; width: 10px; height: 100%; cursor: ew-resize; -webkit-app-region: no-drag; z-index: 10; }
     #grip:hover { background: rgba(255, 255, 255, .08); }
+    #alpha-bar { position: fixed; top: 4px; right: 16px; opacity: 0; transition: opacity .15s; z-index: 11; -webkit-app-region: no-drag; }
+    body:has(#ov-wrap:hover) #alpha-bar, #alpha-bar:hover { opacity: .9; }
+    #alpha { width: 90px; margin: 0; cursor: pointer; accent-color: #8b9098; }
     #link { position: fixed; bottom: 2px; left: 0; right: 0; text-align: center; font: 10px system-ui, 'Malgun Gothic', sans-serif; color: #8b9098; pointer-events: none; }
     #link.off { color: #e0584e; }
   </style>
@@ -17,6 +20,7 @@
 <body>
   <div id="ov-wrap"></div>
   <div id="grip" title="드래그해서 가로 너비 조절"></div>
+  <div id="alpha-bar" title="배경 투명도"><input type="range" id="alpha" min="5" max="100" step="1"></div>
   <div id="link">웹 연결 대기 중…</div>
   <script src="renderer.js"></script>
 </body>

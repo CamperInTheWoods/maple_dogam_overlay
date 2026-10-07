@@ -57,12 +57,15 @@ function applyBgAlpha() {
   const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(",");
   $("ov-wrap").style.background = `rgba(${rgb},${bgAlpha})`;
 }
-document.addEventListener("wheel", (e) => {
-  if (!e.target.closest("#ov-wrap")) return;
-  bgAlpha = Math.min(1, Math.max(0.05, +(bgAlpha - e.deltaY * 0.001).toFixed(2)));
-  localStorage.setItem("ov-bg-alpha", String(bgAlpha));
-  applyBgAlpha();
-}, { passive: true });
+(function () {
+  const bar = document.getElementById("alpha");
+  bar.value = Math.round(bgAlpha * 100);
+  bar.addEventListener("input", () => {
+    bgAlpha = bar.value / 100;
+    localStorage.setItem("ov-bg-alpha", String(bgAlpha));
+    applyBgAlpha();
+  });
+})();
 
 // 스냅샷은 0.5초마다 오므로, 사이사이는 마지막 값에 경과 시간을 더해 부드럽게 흘려보냄
 let anchor = null; // { elapsed, ch, last, running, at }
