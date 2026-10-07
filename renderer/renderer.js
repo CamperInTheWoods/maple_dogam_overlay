@@ -233,7 +233,10 @@ function render(snap) {
   setShown(lastEl, !!s.ov_show_last_item_time && snap.lastItemMs != null);
 
   const tg = $("ov-toggle");
-  tg.textContent = running ? "⏸ 정지" : "▶ 시작";
+  // ⏸/▶ 문자는 Windows에서 파란 이모지 글꼴로 그려져서, 같은 모양을 SVG로 직접 그림
+  const ICON_PAUSE = '<svg width="9" height="9" viewBox="0 0 9 9" aria-hidden="true"><rect x="0" y="0" width="3" height="9" fill="currentColor"/><rect x="6" y="0" width="3" height="9" fill="currentColor"/></svg>';
+  const ICON_PLAY = '<svg width="9" height="9" viewBox="0 0 9 9" aria-hidden="true"><path d="M0 0 L9 4.5 L0 9 Z" fill="currentColor"/></svg>';
+  tg.innerHTML = running ? `${ICON_PAUSE} 정지` : `${ICON_PLAY} 시작`;
   tg.className = "ov-toggle" + (running ? " run" : "");
 
   renderCards(snap);
