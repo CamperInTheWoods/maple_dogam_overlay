@@ -7,6 +7,8 @@
     html, body { background: transparent !important; }
     #ov-wrap { -webkit-app-region: drag; border-radius: 12px; padding: 8px 10px !important; }
     #ov-wrap button, #ov-wrap .ov-item-card, #ov-wrap .ov-mcard-card { -webkit-app-region: no-drag; }
+    #grip { position: fixed; top: 0; right: 0; width: 10px; height: 100%; cursor: ew-resize; -webkit-app-region: no-drag; z-index: 10; }
+    #grip:hover { background: rgba(255, 255, 255, .08); }
     #link { position: fixed; bottom: 2px; left: 0; right: 0; text-align: center; font: 10px system-ui, 'Malgun Gothic', sans-serif; color: #8b9098; pointer-events: none; }
     #link.off { color: #e0584e; }
   </style>
@@ -14,6 +16,7 @@
 </head>
 <body>
   <div id="ov-wrap"></div>
+  <div id="grip" title="드래그해서 가로 너비 조절"></div>
   <div id="link">웹 연결 대기 중…</div>
   <script src="renderer.js"></script>
 </body>

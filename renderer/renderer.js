@@ -184,6 +184,20 @@ function render(snap) {
   fitWindow(snap);
 }
 
+// 좌우 가장자리는 프레임 없는 투명 창에서 OS 리사이즈가 안 잡혀서, 오른쪽 손잡이를 직접 구현
+(function () {
+  const grip = document.getElementById("grip");
+  let startX = 0, startW = 0;
+  const onMove = (e) => window.overlay.resize(startW + (e.screenX - startX), window.outerHeight);
+  const onUp = () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
+  grip.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    startX = e.screenX; startW = window.outerWidth;
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  });
+})();
+
 window.overlay.onSnapshot(render);
 
 window.overlay.onLinkState((st) => {
