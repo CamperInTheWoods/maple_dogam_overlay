@@ -66,6 +66,7 @@ function createWindow() {
     backgroundColor: "#00000000",
     alwaysOnTop: true,
     skipTaskbar: true,
+    icon: require("path").join(__dirname, "build", "icon.png"),
     hasShadow: false,
     resizable: true,
     webPreferences: { preload: require("path").join(__dirname, "preload.js") },
