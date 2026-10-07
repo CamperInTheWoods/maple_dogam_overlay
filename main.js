@@ -5,7 +5,6 @@ const PORT = 47823;
 // 정확히 일치하는 출처만 허용 (접두사 비교는 localhost.evil.com 같은 주소를 통과시키므로 쓰지 않음)
 const ALLOWED_ORIGINS = new Set([
   "https://camperinthewoods.github.io",
-  "http://localhost:8080", // 로컬 테스트용 (npx serve)
 ]);
 const STALE_MS = 5000;
 
