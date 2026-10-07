@@ -70,10 +70,26 @@ function fmtTime(ms) {
 }
 
 let built = false;
+let pendingRun = null, pendingUntil = 0; // 시작/정지 버튼을 누른 직후의 임시 상태
+// ⏸/▶ 문자는 Windows에서 파란 이모지 글꼴로 그려져서, 같은 모양을 SVG로 직접 그림
+function paintToggle(run) {
+  const tg = $("ov-toggle");
+  const ICON_PAUSE = '<svg width="9" height="9" viewBox="0 0 9 9" aria-hidden="true"><rect x="0" y="0" width="3" height="9" fill="currentColor"/><rect x="6" y="0" width="3" height="9" fill="currentColor"/></svg>';
+  const ICON_PLAY = '<svg width="9" height="9" viewBox="0 0 9 9" aria-hidden="true"><path d="M0 0 L9 4.5 L0 9 Z" fill="currentColor"/></svg>';
+  tg.innerHTML = run ? `${ICON_PAUSE} 정지` : `${ICON_PLAY} 시작`;
+  tg.className = "ov-toggle" + (run ? " run" : "");
+}
 function ensureSkeleton() {
   if (built) return;
   $("ov-wrap").innerHTML = SKELETON;
-  $("ov-toggle").addEventListener("click", () => window.overlay.sendCommand({ type: "toggle" }));
+  // 누르는 즉시 화면을 먼저 바꾸고, 웹이 실제로 반영한 스냅샷이 오면 그 값으로 맞춤
+  $("ov-toggle").addEventListener("click", () => {
+    const cur = pendingRun ?? !!(anchor && anchor.running);
+    pendingRun = !cur;
+    pendingUntil = performance.now() + 1500;
+    paintToggle(pendingRun);
+    window.overlay.sendCommand({ type: "toggle" });
+  });
   $("ov-ch").addEventListener("click", () => window.overlay.sendCommand({ type: "channel" }));
   // 기준 아이템/몬스터카드 좌클릭 +1 (웹 오버레이와 동일 동작, 실제 증가는 웹이 처리)
   $("ov-item").addEventListener("click", (e) => {
@@ -232,12 +248,9 @@ function render(snap) {
   const lastEl = $("ov-last-item-time");
   setShown(lastEl, !!s.ov_show_last_item_time && snap.lastItemMs != null);
 
-  const tg = $("ov-toggle");
-  // ⏸/▶ 문자는 Windows에서 파란 이모지 글꼴로 그려져서, 같은 모양을 SVG로 직접 그림
-  const ICON_PAUSE = '<svg width="9" height="9" viewBox="0 0 9 9" aria-hidden="true"><rect x="0" y="0" width="3" height="9" fill="currentColor"/><rect x="6" y="0" width="3" height="9" fill="currentColor"/></svg>';
-  const ICON_PLAY = '<svg width="9" height="9" viewBox="0 0 9 9" aria-hidden="true"><path d="M0 0 L9 4.5 L0 9 Z" fill="currentColor"/></svg>';
-  tg.innerHTML = running ? `${ICON_PAUSE} 정지` : `${ICON_PLAY} 시작`;
-  tg.className = "ov-toggle" + (running ? " run" : "");
+  // 웹이 명령을 반영하기 전까지는 누른 쪽 상태를 보여주고, 반영되거나 1.5초가 지나면 실제 값으로 맞춤
+  if (pendingRun !== null && (running === pendingRun || performance.now() > pendingUntil)) pendingRun = null;
+  paintToggle(pendingRun ?? running);
 
   renderCards(snap);
   renderTimeline(snap);
