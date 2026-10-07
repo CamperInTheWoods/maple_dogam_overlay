@@ -49,6 +49,21 @@ function ensureSkeleton() {
   built = true;
 }
 
+// 배경 투명도 — 마우스 휠을 카드 위에서 굴리면 조절, 이 PC의 설치형 창에만 저장됨
+let lastBg = "#ffffff";
+let bgAlpha = Number(localStorage.getItem("ov-bg-alpha") ?? 0.85);
+function applyBgAlpha() {
+  const n = parseInt(lastBg.slice(1), 16);
+  const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(",");
+  $("ov-wrap").style.background = `rgba(${rgb},${bgAlpha})`;
+}
+document.addEventListener("wheel", (e) => {
+  if (!e.target.closest("#ov-wrap")) return;
+  bgAlpha = Math.min(1, Math.max(0.05, +(bgAlpha - e.deltaY * 0.001).toFixed(2)));
+  localStorage.setItem("ov-bg-alpha", String(bgAlpha));
+  applyBgAlpha();
+}, { passive: true });
+
 // 스냅샷은 0.5초마다 오므로, 사이사이는 마지막 값에 경과 시간을 더해 부드럽게 흘려보냄
 let anchor = null; // { elapsed, ch, last, running, at }
 function liveMs(base) {
@@ -153,7 +168,8 @@ function render(snap) {
   const theme = snap.theme || { bg: "#ffffff" };
   const styleEl = document.getElementById("ov-style");
   if (styleEl.dataset.src !== snap.style) { styleEl.dataset.src = snap.style || ""; styleEl.textContent = snap.style || ""; }
-  $("ov-wrap").style.background = `${theme.bg}d9`;
+  lastBg = theme.bg;
+  applyBgAlpha();
   document.body.classList.toggle("small", !!s.ov_small);
   document.body.classList.toggle("tl-layout", !!s.ov_tl_layout);
 
