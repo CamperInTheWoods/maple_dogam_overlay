@@ -140,7 +140,7 @@ let lastSize = "", lastWinW = null;
 function fitWindow(snap) {
   const small = !!(snap.settings || {}).ov_small;
   const wrap = $("ov-wrap");
-  const h = Math.ceil((small ? 6 : 10) + wrap.getBoundingClientRect().height + (small ? 4 : 6));
+  const h = Math.ceil((small ? 6 : 10) + wrap.getBoundingClientRect().height + 2);
   const w = snap.winW !== lastWinW ? snap.winW : window.innerWidth;
   lastWinW = snap.winW;
   const key = `${w}x${h}`;
