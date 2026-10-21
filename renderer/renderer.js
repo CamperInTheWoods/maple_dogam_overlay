@@ -105,7 +105,7 @@ function ensureSkeleton() {
 
 // 배경 투명도 — 마우스 휠을 카드 위에서 굴리면 조절, 이 PC의 설치형 창에만 저장됨
 let lastBg = "#ffffff";
-let bgAlpha = Number(localStorage.getItem("ov-bg-alpha") ?? 0.85);
+let bgAlpha = Number(localStorage.getItem("ov-bg-alpha") ?? 0.5);
 function applyBgAlpha() {
   const n = parseInt(lastBg.slice(1), 16);
   const rgb = [(n >> 16) & 255, (n >> 8) & 255, n & 255].join(",");
