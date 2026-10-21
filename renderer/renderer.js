@@ -271,6 +271,8 @@ function render(snap) {
   });
 })();
 
+document.getElementById("close-btn").addEventListener("click", () => window.overlay.close());
+
 window.overlay.onSnapshot(render);
 
 window.overlay.onLinkState((st) => {
