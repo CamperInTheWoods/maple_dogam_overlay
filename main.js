@@ -65,7 +65,7 @@ function createWindow() {
     transparent: true,
     backgroundColor: "#00000000",
     alwaysOnTop: true,
-    skipTaskbar: true,
+    skipTaskbar: false, // 작업표시줄에 보이게 — 창이 안 보이거나 찾기 힘들 때 거기서 클릭/우클릭 닫기로 복구 가능
     icon: require("path").join(__dirname, "build", "icon.png"),
     hasShadow: false,
     resizable: true,
