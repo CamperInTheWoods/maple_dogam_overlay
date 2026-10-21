@@ -1,6 +1,8 @@
 const { contextBridge, ipcRenderer } = require("electron");
+const { version } = require("./package.json");
 
 contextBridge.exposeInMainWorld("overlay", {
+  version,
   onSnapshot: (cb) => ipcRenderer.on("snapshot", (_e, snap) => cb(snap)),
   onLinkState: (cb) => ipcRenderer.on("link-state", (_e, st) => cb(st)),
   close: () => ipcRenderer.send("close-overlay"),

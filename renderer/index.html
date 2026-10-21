@@ -20,6 +20,9 @@
     #close-btn:hover { color: #e0584e; opacity: 1; }
     #link { position: fixed; bottom: 2px; left: 0; right: 0; text-align: center; font: 10px system-ui, 'Malgun Gothic', sans-serif; color: #8b9098; pointer-events: none; }
     #link.off { color: #e0584e; }
+    #ver-label { position: fixed; bottom: 2px; right: 6px; font: 9px system-ui, 'Malgun Gothic', sans-serif; color: #8b9098;
+      opacity: 0; transition: opacity .15s; pointer-events: none; z-index: 11; }
+    body:has(#ov-wrap:hover) #ver-label { opacity: .8; }
   </style>
   <style id="ov-style"></style>
 </head>
@@ -29,6 +32,7 @@
   <div id="grip" title="드래그해서 가로 너비 조절"></div>
   <div id="alpha-bar" title="배경 투명도"><input type="range" id="alpha" min="5" max="100" step="1"></div>
   <div id="link">웹 연결 대기 중…</div>
+  <div id="ver-label"></div>
   <script src="renderer.js"></script>
 </body>
 </html>

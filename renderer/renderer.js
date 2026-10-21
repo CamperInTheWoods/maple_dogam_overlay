@@ -272,6 +272,7 @@ function render(snap) {
 })();
 
 document.getElementById("close-btn").addEventListener("click", () => window.overlay.close());
+document.getElementById("ver-label").textContent = `v${window.overlay.version}`;
 
 window.overlay.onSnapshot(render);
 
