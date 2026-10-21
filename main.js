@@ -18,7 +18,10 @@ function allowOrigin(req, res) {
   const ok = ALLOWED_ORIGINS.has(origin);
   if (ok) {
     res.setHeader("Access-Control-Allow-Origin", origin);
+    // Chrome이 "Private Network Access"를 "Local Network Access"로 개편하면서 헤더 이름이
+    // 바뀌었을 가능성이 있어 둘 다 보냄 (모르는 헤더는 그냥 무시되니 안전)
     res.setHeader("Access-Control-Allow-Private-Network", "true");
+    res.setHeader("Access-Control-Allow-Local-Network", "true");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   }
