@@ -274,10 +274,16 @@ function render(snap) {
 document.getElementById("close-btn").addEventListener("click", () => window.overlay.close());
 document.getElementById("ver-label").textContent = `v${window.overlay.version}`;
 
+// 웹이 아직 연결 안 됐으면 render()가 한 번도 안 불려서 카드가 비어있던 문제 — 그러면 호버할
+// 영역도 거의 없어서 닫기 버튼을 찾을 방법이 없었음. 연결 전에도 스켈레톤을 바로 그려둠.
+ensureSkeleton();
+
 window.overlay.onSnapshot(render);
 
 window.overlay.onLinkState((st) => {
   const el = $("link");
   el.textContent = st.connected ? "" : "연결 끊김 (웹 탭을 열어주세요)";
   el.className = st.connected ? "" : "off";
+  // 연결이 안 됐을 때는 카드에 마우스를 올릴 이유가 없을 수 있으니, 닫기 버튼을 항상 보이게 둠
+  document.getElementById("close-btn").style.opacity = st.connected ? "" : ".7";
 });
